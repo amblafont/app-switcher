@@ -18,6 +18,10 @@ import os
 
 ewmh = EWMH()
 
+
+# The custom xproperty set to remember the path of a winsow
+path_xproperty_name =  "CUSTOM_TREE_PATH"
+
 # the first argument is a window PID
 if (len(sys.argv) > 1):
    selected_wid = int(sys.argv[1])
@@ -25,9 +29,6 @@ if (len(sys.argv) > 1):
    print()
 else:
    selected_wid = None
-
-# The custom xproperty set to remember the path of a winsow
-path_xproperty_name =  "CUSTOM_TREE_PATH"
 
 
 display = Xlib.display.Display()
@@ -56,26 +57,8 @@ def window_obj(wid):
     yield window_obj
 
 
-# this is taken from https://gist.github.com/ssokolow/e7c9aae63fb7973e4d64cff969a78ae8
 def win_get_name(win_obj):
-    """Simplify dealing with _NET_WM_NAME (UTF-8) vs. WM_NAME (legacy)"""
-    for atom in (NET_WM_NAME, WM_NAME):
-        try:
-            window_name = win_obj.get_full_property(atom, 0)
-        except UnicodeDecodeError:  # Apparently a Debian distro package bug
-            title = "<could not decode characters>"
-        else:
-            if window_name:
-                win_name = window_name.value
-                if isinstance(win_name, bytes):
-                    # Apparently COMPOUND_TEXT is so arcane that this is how
-                    # tools like xprop deal with receiving it these days
-                    win_name = win_name.decode('latin1', 'replace')
-                return win_name
-            else:
-                title = "<unnamed window>"
-
-    return "{} (XID: {})".format(title, win_obj.id)
+    return ewmh.getWmName(win_obj)
 
 # These functions were inspired by xproperty python git repo
 
@@ -91,17 +74,15 @@ def atom_s2i(string):
 
 
 # focus on (switch to) a specific window
-# unfortunately, I have not managed to make this work using
-# the xlib library, so I rely on 'xprop'.
-def wid_focus(wid):
-    cmd = "wmctrl -i -a " + str(wid)
-    print(cmd)
-    os.system(cmd)
+def win_focus(win):
+    ewmh.setActiveWindow(win)
+    ewmh.setCurrentDesktop(ewmh.getWmDesktop(win))
+    ewmh.display.flush()
 
 # set the path (an array of string) of the given window
 # unfortunately, I have not managed to make this work using
 # the xlib library, so I rely on 'xprop'.
-def wid_set_path(wid, value):
+def wid_set_path(win, value):
     cmd = 'xprop -id %d -f %s 8s -set %s "%s"' % (wid, path_xproperty_name, path_xproperty_name, "/".join(value))
     print (cmd)
     os.system(cmd)
@@ -322,7 +303,7 @@ matching_node = matching_nodes[cursor]
 if node_has_wins(matching_node):
     w = node_get_wins(matching_node)[0]
     print("found window:", win_get_name(w))
-    wid_focus(w.id)
+    win_focus(w)
 else:
     print("No window there")
     node_dump (node)
