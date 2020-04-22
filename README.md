@@ -1,6 +1,6 @@
 Switcher between applications (written in python 2).
 Each X window can be associated with a custom virtual path. Then, you can switch
-to a specific window by entering the type.
+to a specific window by entering the path.
 
 # Usage
 
