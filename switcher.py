@@ -10,6 +10,7 @@ from ewmh import EWMH
 
 from contextlib import contextmanager
 import Xlib.display
+from Xlib import protocol
 from getkey import getkey, keys
 
 from anytree import Node, RenderTree, Resolver
@@ -72,6 +73,8 @@ def atom_s2i(string):
   else:
     return i
 
+print(atom_s2i('WM_NAME'))
+print(atom_s2i(path_xproperty_name))
 
 # focus on (switch to) a specific window
 def win_focus(win):
@@ -79,13 +82,16 @@ def win_focus(win):
     ewmh.setCurrentDesktop(ewmh.getWmDesktop(win))
     ewmh.display.flush()
 
-# set the path (an array of string) of the given window
-# unfortunately, I have not managed to make this work using
-# the xlib library, so I rely on 'xprop'.
-def wid_set_path(win, value):
-    cmd = 'xprop -id %d -f %s 8s -set %s "%s"' % (wid, path_xproperty_name, path_xproperty_name, "/".join(value))
+# Unfortunately, I haven't found how to set a custom property using in python xlib
+def win_setProperty(win, xprop_name, data):
+    cmd = 'xprop -id %d -f %s 8s -set %s "%s"' % (win.id, xprop_name, xprop_name, data)
     print (cmd)
     os.system(cmd)
+
+def wid_set_path(wid, value):
+    with window_obj(wid) as win:
+        win_setProperty(win, path_xproperty_name, "/".join(value))
+
 
 
 # get the path associated to a window 
@@ -220,7 +226,8 @@ print()
 curNode = node_may_get_parent(node_find_by_path_create(tree_wins, selected_path))
 
 print()
-print("F2: set the path of the selected window")
+print("ESC: Quit")
+print("F2: Set the path of the selected window")
 print("Otherwise, type the path of some other window to jump to")
 print()
 key = getkey()
