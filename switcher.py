@@ -10,7 +10,7 @@ from ewmh import EWMH
 
 from contextlib import contextmanager
 import Xlib.display
-from Xlib import protocol
+from Xlib import protocol, Xatom
 from getkey import getkey, keys
 
 from anytree import Node, RenderTree, Resolver
@@ -73,9 +73,6 @@ def atom_s2i(string):
   else:
     return i
 
-print(atom_s2i('WM_NAME'))
-print(atom_s2i(path_xproperty_name))
-
 # focus on (switch to) a specific window
 def win_focus(win):
     ewmh.setActiveWindow(win)
@@ -87,6 +84,11 @@ def win_setProperty(win, xprop_name, data):
     cmd = 'xprop -id %d -f %s 8s -set %s "%s"' % (win.id, xprop_name, xprop_name, data)
     print (cmd)
     os.system(cmd)
+    # property = atom_s2i(xprop_name)
+    # window.change_property(property, Xatom.STRING, 8, str(data)) #, onerror = (lambda x , y : print("Erreur")))
+    # window.query_tree()
+    # display.screen().root.query_tree()
+ 
 
 def wid_set_path(wid, value):
     with window_obj(wid) as win:
@@ -110,7 +112,8 @@ def win_get_path(window):
      values = property.value.split('/')
      return values
    else:
-     raise NotImplementedError('Im sorry, I can handle only STRINGs so far.')
+     return None
+     # raise NotImplementedError('Im sorry, I can handle only STRINGs so far.')
 
 
  
