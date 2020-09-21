@@ -16,8 +16,8 @@ window pid (using xdotool for example)
 
 Python libraries: xlib, ewmh, anytree, getkey.
 
-System requirements: xprop
-(because I don't understand how to set a 
+System requirements: xprop, wmctrl
+(because I don't understand, for example, how to set a 
 custom xproperty of some specific window using the xlib python library).
 
 

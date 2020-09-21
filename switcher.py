@@ -74,10 +74,14 @@ def atom_s2i(string):
     return i
 
 # focus on (switch to) a specific window
+# Unfortunately, I haven't found how to do it programmatically
 def win_focus(win):
-    ewmh.setActiveWindow(win)
-    ewmh.setCurrentDesktop(ewmh.getWmDesktop(win))
-    ewmh.display.flush()
+    cmd = "wmctrl -i -a " + str(win.id)
+    print(cmd)
+    os.system(cmd)
+#    ewmh.setActiveWindow(win)
+#    ewmh.setCurrentDesktop(ewmh.getWmDesktop(win))
+#    ewmh.display.flush()
 
 # Unfortunately, I haven't found how to set a custom property using in python xlib
 def win_setProperty(win, xprop_name, data):
@@ -87,6 +91,7 @@ def win_setProperty(win, xprop_name, data):
     # property = atom_s2i(xprop_name)
     # window.change_property(property, Xatom.STRING, 8, str(data)) #, onerror = (lambda x , y : print("Erreur")))
     # window.query_tree()
+
     # display.screen().root.query_tree()
  
 
